@@ -1,3 +1,6 @@
+# Hand Tracking Fun Project - Git Ignore File
+# Keeping the repo clean while we experiment! 🧹
+
 # Virtual Environment
 venv/
 env/
@@ -32,6 +35,50 @@ Thumbs.db
 *.tmp
 *.temp
 
-# Images (optional - remove if you want to include placeholder.jpg)
+# PyInstaller build files (from your build/ and dist/ folders)
+build/
+dist/
+*.spec
+
+# Python wheel files
+*.whl
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Testing
+.pytest_cache/
+.tox/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Temporary experiment files
+test_*.py
+experiment_*.py
+
+# Images (uncomment if you don't want to share your placeholder.jpg)
 # *.jpg
 # *.png

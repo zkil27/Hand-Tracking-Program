@@ -3,6 +3,10 @@ import cv2 as cv
 from PIL import Image, ImageTk
 import time
 import mediapipe as mp
+import os 
+
+VideoCapture = 1
+fireimage_path = os.path.join(os.path.dirname(__file__), "placeholder.jpg")
 
 class App:
     def __init__(self, root):
@@ -31,7 +35,6 @@ class App:
         self.handstatus_Label = Label(self.frame, text="Hand Status", font=("Arial", 10))
         self.handstatus_Label.place(x=20, y=60)
 
-        fireimage_path = "placeholder.jpg"
         fire_image = Image.open(fireimage_path)
         fire_image = fire_image.resize((100, 100), Image.LANCZOS)
         self.fire_photo = ImageTk.PhotoImage(fire_image)
@@ -53,7 +56,7 @@ class App:
         )
         self.mp_drawing = mp.solutions.drawing_utils
 
-        self.cam = cv.VideoCapture(1)  
+        self.cam = cv.VideoCapture(VideoCapture)  
         if not self.cam.isOpened():
             print("No Camera found")
             self.cleanup()
@@ -75,17 +78,32 @@ class App:
             print("Hand skeleton hidden")
 
     def update(self):
-        ret, frame = self.cam.read()   
+        ret, frame = self.cam.read()
+        frame = cv.flip(frame, 1) 
         if not ret:
             print("Failed to capture image from camera.")
             self.cleanup()
             return
 
+        left_hand_status = "not detected"
+        right_hand_status = "not detected"
+
+        
         rgb_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         results = self.hands.process(rgb_frame)
 
         if results.multi_hand_landmarks:
-            for hand_landmarks in results.multi_hand_landmarks:
+            for hand_landmarks, hand_classification in zip(results.multi_hand_landmarks, results.multi_handedness):
+
+                hand_label = hand_classification.classification[0].label
+                hand_confidence = hand_classification.classification[0].score
+
+                if hand_label == "Left":
+                    print(f"Left Hand: {hand_confidence:.2f}")
+                else:
+                    print(f"Right Hand: {hand_confidence:.2f}")
+
+
                 if self.show_skeleton:
                     self.mp_drawing.draw_landmarks(frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)     
                 h, w, _ = frame.shape
@@ -138,6 +156,7 @@ class App:
             self.cam.release()
         if hasattr(self, 'root'):
             self.root.quit()
+            print("Application closed.")
 
     def __del__(self):
         self.cleanup()
