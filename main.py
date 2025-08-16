@@ -10,9 +10,7 @@ fireimage_path = os.path.join(os.path.dirname(__file__), "placeholder.jpg")
 
 class App:
     def __init__(self, root):
-        # Initialize camera as None first
-        self.cam = None
-        
+        self.cam = None        
         self.prev_frame_time = 0
         self.frame_count = 0
 
@@ -24,7 +22,6 @@ class App:
     
         self.frame = Frame(self.root)
         self.frame.pack()
-
 
         self.canvas = Canvas(self.frame, width=1080, height=720, bg="black")
         self.canvas.pack()
@@ -45,7 +42,6 @@ class App:
         landmark_frame_Button.place(x=20, y=90)
         
         
-        # HandFrame Setup
         self.mp_hands = mp.solutions.hands
         self.hands = self.mp_hands.Hands(
             static_image_mode=False,
