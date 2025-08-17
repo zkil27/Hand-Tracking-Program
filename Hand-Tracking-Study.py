@@ -1,29 +1,31 @@
 from tkinter import *
 import cv2 as cv
 from PIL import Image, ImageTk
-import time
 import mediapipe as mp
 import os 
 
 VideoCapture = 1
-fireimage_path = os.path.join(os.path.dirname(__file__), "placeholder.jpg")
+fireimage_path = os.path.join(os.path.dirname(__file__), "placeholder.png")
+capture_x = 1300
+capture_y = 800
+
 
 class App:
     def __init__(self, root):
-        self.cam = None        
+        self.cap = None        
         self.prev_frame_time = 0
         self.frame_count = 0
 
         # GUI Setup
         self.root = root
         self.root.title("Python Study")
-        self.root.geometry("1080x720")
-        self.root.resizable(False, False)
+        self.root.geometry("1300x800")
+        self.root.resizable(True, True)
     
         self.frame = Frame(self.root)
         self.frame.pack()
 
-        self.canvas = Canvas(self.frame, width=1080, height=720, bg="black")
+        self.canvas = Canvas(self.frame, width=capture_x, height=capture_y, bg="black")
         self.canvas.pack()
 
         self.coords_Label = Label(self.frame, text="Coords: 0, 0", font=("Arial", 10))
@@ -46,20 +48,20 @@ class App:
         self.hands = self.mp_hands.Hands(
             static_image_mode=False,
             max_num_hands=2,
-            min_detection_confidence=0.7,
-            min_tracking_confidence=0.7,
+            min_detection_confidence=0.10,
+            min_tracking_confidence=0.10,
             model_complexity=0 
         )
         self.mp_drawing = mp.solutions.drawing_utils
 
-        self.cam = cv.VideoCapture(VideoCapture)  
-        if not self.cam.isOpened():
+        self.cap = cv.VideoCapture(VideoCapture)  
+        if not self.cap.isOpened():
             print("No Camera found")
             self.cleanup()
             return
             
-        self.cam.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-        self.cam.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+        self.cap.set(cv.CAP_PROP_FRAME_WIDTH, capture_x)
+        self.cap.set(cv.CAP_PROP_FRAME_HEIGHT, capture_y)
         self.delay = 15 
         self.show_skeleton = True
         
@@ -74,7 +76,7 @@ class App:
             print("Hand skeleton hidden")
 
     def update(self):
-        ret, frame = self.cam.read()
+        ret, frame = self.cap.read()
         frame = cv.flip(frame, 1) 
         if not ret:
             print("Failed to capture image from camera.")
@@ -121,19 +123,19 @@ class App:
                 middle_finger_mcp_py = int(middle_finger_mcp.y * h)
                 middle_finger_mcp_px = int(middle_finger_mcp.x * w)
 
-                if (index_finger_tip_py < middle_finger_mcp_py and 
-                    middle_finger_tip_py < middle_finger_mcp_py and 
-                    ring_finger_tip_py < middle_finger_mcp_py and 
-                    pinky_finger_tip_py < middle_finger_mcp_py):
-                    self.fireimage_Label.place(x=middle_finger_mcp_px - 20, y=middle_finger_mcp_py + 50)
-                    self.coords_Label.config(text=f"Coords: {middle_finger_mcp_px - 20}, {middle_finger_mcp_py + 50}")
-                    self.handstatus_Label.config(text="Hand Status: Opened")
+                if (index_finger_tip_py > middle_finger_mcp_py and 
+                    middle_finger_tip_py > middle_finger_mcp_py and 
+                    ring_finger_tip_py > middle_finger_mcp_py and 
+                    pinky_finger_tip_py > middle_finger_mcp_py):
 
-                else:
+                
                     self.fireimage_Label.place_forget()
                     self.handstatus_Label.config(text="Hand Status: Closed")
+                else:
+                    self.handstatus_Label.config(text="Hand Status: Opened")
 
-
+                    self.fireimage_Label.place(x=middle_finger_mcp_px - 20, y=middle_finger_mcp_py + 50)
+                    self.coords_Label.config(text=f"Coords: {middle_finger_mcp_px - 20}, {middle_finger_mcp_py + 50}")
 
         display_frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
         img = Image.fromarray(display_frame)
